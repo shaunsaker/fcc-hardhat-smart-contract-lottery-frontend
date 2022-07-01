@@ -7,12 +7,12 @@ import { useNotification } from "web3uikit"
 
 interface LotteryEntranceProps {}
 
+// TODO: how to sync to the WinnerPicked event? We need to call getRaffleData there
 export const LotteryEntrance = ({}: LotteryEntranceProps): ReactElement => {
-  const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
+  const { chainId: chainIdHex, isWeb3Enabled, Moralis } = useMoralis()
   const chainId = chainIdHex ? parseInt(chainIdHex) : 0
-  const raffleAddress = chainIdHex
-    ? (contractAddresses as Record<string, string[]>)[chainId][0]
-    : ""
+  const raffleAddresses = chainIdHex ? (contractAddresses as Record<string, string[]>)[chainId] : []
+  const raffleAddress = raffleAddresses ? raffleAddresses[0] : ""
   const [entranceFee, setEntranceFee] = useState("0")
   const [numberOfPlayers, setNumberOfPlayers] = useState(0)
   const [recentWinner, setRecentWinner] = useState("")
@@ -48,6 +48,10 @@ export const LotteryEntrance = ({}: LotteryEntranceProps): ReactElement => {
   })
 
   const getRaffleData = useCallback(async () => {
+    if (!raffleAddress) {
+      return
+    }
+
     const _entranceFee = ((await getEntranceFee()) as number).toString()
     const _numberOfPlayers = parseInt(((await getNumberOfPlayers()) as number).toString())
     const _recentWiner = (await getRecentWinner()) as string
@@ -55,13 +59,17 @@ export const LotteryEntrance = ({}: LotteryEntranceProps): ReactElement => {
     setEntranceFee(_entranceFee || "")
     setNumberOfPlayers(_numberOfPlayers || 0)
     setRecentWinner(_recentWiner || "")
-  }, [getEntranceFee, getNumberOfPlayers, getRecentWinner])
+  }, [raffleAddress, getEntranceFee, getNumberOfPlayers, getRecentWinner])
 
   useEffect(() => {
     if (isWeb3Enabled) {
       getRaffleData()
+
+      Moralis.once("WinnerPicked", () => {
+        console.log("YAY")
+      })
     }
-  }, [isWeb3Enabled, getRaffleData])
+  }, [isWeb3Enabled, getRaffleData, Moralis])
 
   const onEnterRaffleClick = useCallback(async () => {
     await enterRaffle({
