@@ -18,7 +18,11 @@ export const LotteryEntrance = ({}: LotteryEntranceProps): ReactElement => {
   const [recentWinner, setRecentWinner] = useState("")
   const notify = useNotification()
 
-  const { runContractFunction: enterRaffle } = useWeb3Contract({
+  const {
+    runContractFunction: enterRaffle,
+    isLoading,
+    isFetching,
+  } = useWeb3Contract({
     abi,
     contractAddress: raffleAddress,
     functionName: "enterRaffle",
@@ -102,8 +106,18 @@ export const LotteryEntrance = ({}: LotteryEntranceProps): ReactElement => {
   }
 
   return (
-    <div>
-      <button onClick={onEnterRaffleClick}>Enter Raffle</button>
+    <div className="p-5">
+      <button
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+        disabled={isLoading || isFetching}
+        onClick={onEnterRaffleClick}
+      >
+        {isLoading || isFetching ? (
+          <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full" />
+        ) : (
+          "Enter Raffle"
+        )}
+      </button>
 
       <div>Entrance Fee: {ethers.utils.formatUnits(entranceFee, "ether")}</div>
       <div>Number of Players: {numberOfPlayers}</div>

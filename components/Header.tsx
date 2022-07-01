@@ -5,10 +5,12 @@ interface HeaderProps {}
 
 export const Header = ({}: HeaderProps): ReactElement => {
   return (
-    <div>
-      <h1>Decentralised Lottery</h1>
+    <div className="p-5 border-b-2 flex flex-row">
+      <h1 className="py-4 px-4 font-blog text-3xl">Decentralised Lottery</h1>
 
-      <ConnectButton moralisAuth={false} />
+      <div className="ml-auto py-2 px-4">
+        <ConnectButton moralisAuth={false} />
+      </div>
     </div>
   )
 }
